@@ -2,16 +2,80 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Player Info Checker</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <style> /* আপনার CSS এখানে থাকবে */ </style>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .checker-container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+        }
+        h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .input-field {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        .check-button {
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .check-button:hover {
+            background-color: #0056b3;
+        }
+        .result-box {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #eee;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            min-height: 50px;
+            font-weight: bold;
+            color: #555;
+            word-wrap: break-word;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            line-height: 1.5;
+        }
+    </style>
 </head>
 <body>
     <div class="checker-container">
         <h2>Player Name Checker</h2>
         <input type="number" id="player_id" class="input-field" placeholder="Enter Player UID Here">
         <button id="check_name_button" class="check-button">Check Player Name</button>
-        <div id="gamename_result" class="result-box"></div>
+        <div id="gamename_result" class="result-box">
+            <!-- প্লেয়ারের তথ্য এখানে দেখানো হবে -->
+        </div>
     </div>
 
     <script>
@@ -38,16 +102,22 @@
                 contentType: 'application/json',
                 data: JSON.stringify(payload),
                 dataType: 'json',
+                timeout: 15000,
                 success: function (response) {
                     if (response && response.nickname) {
                         var displayText = 'নাম: ' + response.nickname + '<br>রিজিয়ন: ' + response.region.toUpperCase();
                         resultBox.html('<span style="color: green;">' + displayText + '</span>');
                     } else {
+                        // যদি সার্ভার থেকে উত্তর আসে কিন্তু nickname না থাকে
                         resultBox.html('<span style="color: red;">খেলোয়াড় পাওয়া যায়নি। অনুগ্রহ করে UID চেক করুন।</span>');
                     }
                 },
-                error: function () {
-                    resultBox.html('<span style="color: red;">সার্ভারের সাথে সংযোগ করা যাচ্ছে না।</span>');
+                error: function (jqXHR) {
+                    var errorMsg = "সার্ভারের সাথে সংযোগ করা যাচ্ছে না।";
+                    if (jqXHR.responseJSON && jqXHR.responseJSON.error) {
+                        errorMsg = jqXHR.responseJSON.error; // ব্যাকএন্ড থেকে আসা এরর মেসেজ দেখানো
+                    }
+                    resultBox.html('<span style="color: red;">' + errorMsg + '</span>');
                 }
             });
         });
