@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <title>Player Info Checker</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <style> /* আপনার CSS এখানে থাকবে */ </style>
+</head>
+<body>
+    <div class="checker-container">
+        <h2>Player Name Checker</h2>
+        <input type="number" id="player_id" class="input-field" placeholder="Enter Player UID Here">
+        <button id="check_name_button" class="check-button">Check Player Name</button>
+        <div id="gamename_result" class="result-box"></div>
+    </div>
+
+    <script>
+    $(document).ready(function () {
+        $('#check_name_button').on('click', function () {
+            var playerUid = $('#player_id').val().trim();
+            var resultBox = $('#gamename_result');
+
+            if (!playerUid) {
+                resultBox.html('<span style="color: red;">অনুগ্রহ করে একটি প্লেয়ার UID লিখুন।</span>');
+                return;
+            }
+
+            // Vercel-এ থাকা আমাদের সার্ভারলেস ফাংশনকে কল করা হচ্ছে
+            var proxyUrl = "/api/proxy";
+            
+            var payload = { uid: playerUid };
+            
+            resultBox.html('<span>খোঁজা হচ্ছে...</span>');
+            
+            $.ajax({
+                url: proxyUrl,
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(payload),
+                dataType: 'json',
+                success: function (response) {
+                    if (response && response.nickname) {
+                        var displayText = 'নাম: ' + response.nickname + '<br>রিজিয়ন: ' + response.region.toUpperCase();
+                        resultBox.html('<span style="color: green;">' + displayText + '</span>');
+                    } else {
+                        resultBox.html('<span style="color: red;">খেলোয়াড় পাওয়া যায়নি। অনুগ্রহ করে UID চেক করুন।</span>');
+                    }
+                },
+                error: function () {
+                    resultBox.html('<span style="color: red;">সার্ভারের সাথে সংযোগ করা যাচ্ছে না।</span>');
+                }
+            });
+        });
+    });
+    </script>
+</body>
+</html>
